@@ -15,7 +15,7 @@ class PayMode implements ArrayInterface {
      */
 	public function toOptionArray() {
         return [
-            ['value' => 'iframe', 'label' => __('Iframe')],
+//            ['value' => 'iframe', 'label' => __('Iframe')],
             ['value' => 'redirect', 'label' =>__('Redirect')]
         ];
     }
