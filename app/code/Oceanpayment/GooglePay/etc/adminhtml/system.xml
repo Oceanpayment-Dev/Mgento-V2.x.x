@@ -25,7 +25,7 @@
                 </field>
                 <field id="gateway_url" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Gateway URL</label>
-                    <source_model>Oceanpayment\ApplePay\Model\Source\GatewayURL</source_model>
+                    <source_model>Oceanpayment\GooglePay\Model\Source\GatewayURL</source_model>
                 </field>
                 <field id="pay_mode" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Pay Mode</label>
