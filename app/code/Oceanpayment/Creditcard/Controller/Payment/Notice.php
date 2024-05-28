@@ -124,6 +124,10 @@ class Notice extends \Magento\Framework\App\Action\Action
                 }
             }
 
+            $payment = $order->getPayment();
+            $payment->setCcTransId($_REQUEST['payment_id']);
+            $payment->setLastTransId($_REQUEST['payment_id'])->setIsTransactionClosed(0);
+
             switch($this->validated($order)){
                 case 1:
                     //支付成功

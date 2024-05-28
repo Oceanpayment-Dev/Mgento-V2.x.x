@@ -94,6 +94,10 @@ class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActi
 
         $history = ' (payment_id:'.$_REQUEST['payment_id'].' | order_number:'.$_REQUEST['order_number'].' | '.$_REQUEST['order_currency'].':'.$_REQUEST['order_amount'].' | payment_details:'.$_REQUEST['payment_details'].')';
 
+        $payment = $order->getPayment();
+        $payment->setCcTransId($_REQUEST['payment_id']);
+        $payment->setLastTransId($_REQUEST['payment_id'])->setIsTransactionClosed(0);
+
         switch($this->validated($order)){
             case 1:
                 //支付成功
@@ -101,9 +105,7 @@ class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActi
                 $order->setStatus($model->getConfigData('success_order_status'));
                 $order->addStatusToHistory($model->getConfigData('success_order_status'), __(self::BrowserReturn.'Payment Success!'.$history));
 
-                $payment = $order->getPayment();
-                $payment->setCcTransId($_REQUEST['payment_id']);
-                $payment->setLastTransId($_REQUEST['payment_id'])->setIsTransactionClosed(0);
+
                 //发送邮件
                 // $this->orderSender->send($order);
                 
