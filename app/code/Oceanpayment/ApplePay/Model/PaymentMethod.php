@@ -244,10 +244,10 @@ class PaymentMethod extends AbstractMethod
     public function isAvailable(\Magento\Quote\Api\Data\CartInterface $quote = null)
     {
         //不在apple设备时隐藏
-        $userAgent = $_SERVER['HTTP_USER_AGENT'];
-        if(!strpos($userAgent,"iPhone") && !strpos($userAgent,"iPad") && !strpos($userAgent,"Mac")){
-            return false;
-        }
+        // $userAgent = $_SERVER['HTTP_USER_AGENT'];
+        // if(!strpos($userAgent,"iPhone") && !strpos($userAgent,"iPad") && !strpos($userAgent,"Mac")){
+        //     return false;
+        // }
         if (parent::isAvailable($quote) && $quote){
             return true;
         }
