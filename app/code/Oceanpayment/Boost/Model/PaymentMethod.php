@@ -171,21 +171,21 @@ class PaymentMethod extends AbstractMethod
         $billing_zip       = $billing->getPostcode();       
         //收货人地址信息
         //收货人名
-        $ship_firstName    = $shipping->getFirstname();
+        $ship_firstName    = empty($shipping) ? $billing_firstName : substr(urlencode($this->OceanHtmlSpecialChars($shipping->getFirstname())), 0, 50);
         //收货人姓
-        $ship_lastName     = $shipping->getLastname();
+        $ship_lastName     = empty($shipping) ? $billing_lastName : substr(urlencode($this->OceanHtmlSpecialChars($shipping->getLastname())),0,50);
         //收货人手机
-        $ship_phone        = $shipping->getTelephone();
+        $ship_phone        = empty($shipping) ? $billing_phone : $shipping->getTelephone();
         //收货人国家
-        $ship_country      = $shipping->getCountryId();
+        $ship_country      = empty($shipping) ? $billing_country : $shipping->getCountryId();
         //收货人州
-        $ship_state        = $shipping->getRegionCode();
+        $ship_state        = empty($shipping) ? $billing_state : $shipping->getRegionCode();
         //收货人城市
-        $ship_city         = $shipping->getCity();
+        $ship_city         = empty($shipping) ? $billing_city : $shipping->getCity();
         //收货人地址
-        $ship_addr         = implode(' ', $shipping->getStreet());
+        $ship_addr         = empty($shipping) ? $billing_address : implode(' ', $shipping->getStreet());
         //收货人邮编
-        $ship_zip          = $shipping->getPostcode();
+        $ship_zip          = empty($shipping) ? $billing_zip : $shipping->getPostcode();
         //产品名称
         $productName       = $productDetails['productName'];
         //产品SKU
