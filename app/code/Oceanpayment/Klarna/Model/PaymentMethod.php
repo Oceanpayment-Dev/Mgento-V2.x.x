@@ -193,7 +193,7 @@ class PaymentMethod extends AbstractMethod
         //账单人地址
         $billing_address   = implode(' ', $billing->getStreet());
         //账单人邮编
-        $billing_zip       = $billing->getPostcode();     
+        $billing_zip       = $billing->getPostcode();
         //收货人名
         $ship_firstName    = empty($shipping) ? $billing_firstName : substr(urlencode($this->OceanHtmlSpecialChars($shipping->getFirstname())), 0, 50);
         //收货人姓
