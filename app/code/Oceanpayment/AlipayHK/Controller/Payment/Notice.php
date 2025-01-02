@@ -26,6 +26,7 @@ class Notice extends \Magento\Framework\App\Action\Action
     protected $orderRepository;
     protected $_scopeConfig;
     protected $_orderFactory;
+    protected $_paymentMethod;
     protected $creditmemoSender;
     protected $orderSender;
 
