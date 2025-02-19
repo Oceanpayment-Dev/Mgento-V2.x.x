@@ -10,6 +10,7 @@ use Magento\Quote\Api\CartManagementInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\RequestInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
 
 class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActionInterface
 {
@@ -117,6 +118,13 @@ class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActi
 
                 $order->save();
 
+                //保存sales->transactions支付记录
+                $payment->setLastTransId($_REQUEST['payment_id'])->setTransactionId($_REQUEST['payment_id'])->setIsTransactionClosed(true)
+                ->setShouldCloseParentTransaction(true);
+                $transaction = $payment->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE, null, true, "");
+                $transaction->setIsClosed(true);
+                $transaction->save();
+
                 $this->checkoutSession->getQuote();
                 $url = 'checkout/onepage/success';
                 break;
@@ -127,6 +135,13 @@ class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActi
                 $order->addStatusToHistory($model->getConfigData('failure_order_status'), __(self::BrowserReturn.'Payment Failed!'.$history));
                 $order->save();
 
+                //保存sales->transactions支付记录
+                $payment->setLastTransId($_REQUEST['payment_id'])->setTransactionId($_REQUEST['payment_id'])->setIsTransactionClosed(true)
+                ->setShouldCloseParentTransaction(true);
+                $transaction = $payment->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_VOID, null, true, "");
+                $transaction->setIsClosed(true);
+                $transaction->save();
+
                 $this->messageManager->addError(__('Payment Failed! '.$_REQUEST['payment_details']));
                 $url = 'checkout/onepage/failure';
                 break;
@@ -136,6 +151,13 @@ class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActi
                 $order->setStatus($model->getConfigData('pre_auth_order_status'));
                 $order->addStatusToHistory($model->getConfigData('pre_auth_order_status'), __(self::BrowserReturn.'(Pre-auth)Payment Pending!'.$history));
                 $order->save();
+
+                //保存sales->transactions支付记录
+                $payment->setLastTransId($_REQUEST['payment_id'])->setTransactionId($_REQUEST['payment_id'])->setIsTransactionClosed(false)
+                ->setShouldCloseParentTransaction(false);
+                $transaction = $payment->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true, "");
+                $transaction->setIsClosed(false);
+                $transaction->save();
 
                 $url = 'checkout/onepage/success';
                 break;
@@ -277,16 +299,19 @@ class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActi
      * return log
      */
     public function returnLog($logType, $data){
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $directoryList = $objectManager->get(DirectoryList::class);
+        $varPath = $directoryList->getPath(DirectoryList::VAR_DIR);
     
         $filedate   = date('Y-m-d');
-        $newfile    = fopen(  dirname(dirname(dirname(__FILE__))) . "/oceanpayment_log/" . $filedate . ".log", "a+" );      
+        $newfile    = fopen(  $varPath. "/oceanpayment_log/" . $filedate . ".log", "a+" );      
         $return_log = date('Y-m-d H:i:s') . $logType . "\r\n";  
         foreach ($data as $k=>$v){
             $return_log .= $k . " = " . $v . "\r\n";
         }   
         $return_log .= '*****************************************' . "\r\n";
-        $return_log = $return_log.file_get_contents( dirname(dirname(dirname(__FILE__))) . "/oceanpayment_log/" . $filedate . ".log");     
-        $filename   = fopen( dirname(dirname(dirname(__FILE__))) . "/oceanpayment_log/" . $filedate . ".log", "r+" );      
+        $return_log = $return_log.file_get_contents( $varPath. "/oceanpayment_log/" . $filedate . ".log");     
+        $filename   = fopen( $varPath. "/oceanpayment_log/" . $filedate . ".log", "r+" );      
         fwrite($filename,$return_log);
         fclose($filename);
         fclose($newfile);
