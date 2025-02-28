@@ -8,6 +8,7 @@ namespace Oceanpayment\PIX\Model;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Sales\Model\Order;
+use Magento\Framework\App\Filesystem\DirectoryList;
 
 class PaymentMethod extends AbstractMethod
 {
@@ -264,16 +265,19 @@ class PaymentMethod extends AbstractMethod
      * post log
      */
     public function postLog($logType, $data){
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $directoryList = $objectManager->get(DirectoryList::class);
+        $varPath = $directoryList->getPath(DirectoryList::VAR_DIR);
     
         $filedate   = date('Y-m-d');
-        $newfile    = fopen(  dirname(dirname(__FILE__)) . "/oceanpayment_log/" . $filedate . ".log", "a+" );      
+        $newfile    = fopen(  $varPath. "/oceanpayment_log/" . $filedate . ".log", "a+" );      
         $return_log = date('Y-m-d H:i:s') . $logType . "\r\n";  
         foreach ($data as $k=>$v){
             $return_log .= $k . " = " . $v . "\r\n";
         }   
         $return_log .= '*****************************************' . "\r\n";
-        $return_log = $return_log.file_get_contents( dirname(dirname(__FILE__)) . "/oceanpayment_log/" . $filedate . ".log");     
-        $filename   = fopen( dirname(dirname(__FILE__)) . "/oceanpayment_log/" . $filedate . ".log", "r+" );      
+        $return_log = $return_log.file_get_contents( $varPath. "/oceanpayment_log/" . $filedate . ".log");     
+        $filename   = fopen( $varPath. "/oceanpayment_log/" . $filedate . ".log", "r+" );      
         fwrite($filename,$return_log);
         fclose($filename);
         fclose($newfile);
