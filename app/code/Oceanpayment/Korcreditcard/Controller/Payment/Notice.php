@@ -5,6 +5,7 @@ namespace Oceanpayment\Korcreditcard\Controller\Payment;
 
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Quote\Api\CartManagementInterface;
+use Magento\Framework\App\Filesystem\DirectoryList;
 
 class Notice extends \Magento\Framework\App\Action\Action
 {
@@ -28,6 +29,7 @@ class Notice extends \Magento\Framework\App\Action\Action
     protected $_orderFactory;
     protected $creditmemoSender;
     protected $orderSender;
+    protected $_paymentMethod;
 
     /**
      * @param \Magento\Framework\App\Action\Context $context
@@ -123,6 +125,10 @@ class Notice extends \Magento\Framework\App\Action\Action
                 }
             }
 
+            $payment = $order->getPayment();
+            $payment->setCcTransId($_REQUEST['payment_id']);
+            $payment->setLastTransId($_REQUEST['payment_id'])->setIsTransactionClosed(0);
+
             switch($this->validated($order)){
                 case 1:
                     //支付成功
@@ -139,6 +145,17 @@ class Notice extends \Magento\Framework\App\Action\Action
                     }
 
                     $order->save();
+
+                    //保存sales->transactions支付记录
+                    $payment->setLastTransId($_REQUEST['payment_id'])->setTransactionId($_REQUEST['payment_id'])->setIsTransactionClosed(true)
+                    ->setShouldCloseParentTransaction(true);
+                    if($_REQUEST['payment_authType'] == 1 || $_REQUEST['payment_authType'] == 3){
+                        $payment->setParentTransactionId($_REQUEST['payment_id']);
+                    }
+                    $transaction = $payment->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_CAPTURE, null, true, "");
+                    $transaction->setIsClosed(true);
+                    $transaction->save();
+
                     break;
                 case 0:
                     //支付失败
@@ -146,6 +163,14 @@ class Notice extends \Magento\Framework\App\Action\Action
                     $order->setStatus($model->getConfigData('failure_order_status'));
                     $order->addStatusToHistory($model->getConfigData('failure_order_status'), __(self::PUSH.$authType.'Payment Failed!'.$history));
                     $order->save();
+
+                    //保存sales->transactions支付记录
+                    $payment->setLastTransId($_REQUEST['payment_id'])->setTransactionId($_REQUEST['payment_id'])->setIsTransactionClosed(true)
+                    ->setShouldCloseParentTransaction(true);
+                    $transaction = $payment->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_VOID, null, true, "");
+                    $transaction->setIsClosed(true);
+                    $transaction->save();
+
                     break;
                 case -1:
                     //交易待处理
@@ -153,6 +178,14 @@ class Notice extends \Magento\Framework\App\Action\Action
                     $order->setStatus($model->getConfigData('pre_auth_order_status'));
                     $order->addStatusToHistory($model->getConfigData('pre_auth_order_status'), __(self::PUSH.'(Pre-auth)Payment Pending!'.$history));
                     $order->save();
+
+                    //保存sales->transactions支付记录
+                    $payment->setLastTransId($_REQUEST['payment_id'])->setTransactionId($_REQUEST['payment_id'])->setIsTransactionClosed(false)
+                    ->setShouldCloseParentTransaction(false);
+                    $transaction = $payment->addTransaction(\Magento\Sales\Model\Order\Payment\Transaction::TYPE_AUTH, null, true, "");
+                    $transaction->setIsClosed(false);
+                    $transaction->save();
+
                     break;
                 case 2:
                     //在网站中已经是支付成功
@@ -290,17 +323,20 @@ class Notice extends \Magento\Framework\App\Action\Action
      * notice log
      */
     public function returnLog($logType, $xml){
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $directoryList = $objectManager->get(DirectoryList::class);
+        $varPath = $directoryList->getPath(DirectoryList::VAR_DIR);
     
         $filedate   = date('Y-m-d');
-        $newfile    = fopen(  dirname(dirname(dirname(__FILE__))) . "/oceanpayment_log/" . $filedate . ".log", "a+" );      
+        $newfile    = fopen(  $varPath. "/oceanpayment_log/" . $filedate . ".log", "a+" );      
         $return_log = date('Y-m-d H:i:s') . $logType . "\r\n";  
         $return_log .= $xml;
         // foreach ($_REQUEST as $k=>$v){
         //     $return_log .= $k . " = " . $v . "\r\n";
         // }   
         $return_log .= '*****************************************' . "\r\n";
-        $return_log = $return_log.file_get_contents( dirname(dirname(dirname(__FILE__))) . "/oceanpayment_log/" . $filedate . ".log");     
-        $filename   = fopen( dirname(dirname(dirname(__FILE__))) . "/oceanpayment_log/" . $filedate . ".log", "r+" );      
+        $return_log = $return_log.file_get_contents( $varPath. "/oceanpayment_log/" . $filedate . ".log");     
+        $filename   = fopen( $varPath. "/oceanpayment_log/" . $filedate . ".log", "r+" );      
         fwrite($filename,$return_log);
         fclose($filename);
         fclose($newfile);
