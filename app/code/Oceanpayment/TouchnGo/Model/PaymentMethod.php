@@ -8,7 +8,7 @@ namespace Oceanpayment\TouchnGo\Model;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Sales\Model\Order;
-use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\Filesystem\DirectoryList; 
 
 class PaymentMethod extends AbstractMethod
 {

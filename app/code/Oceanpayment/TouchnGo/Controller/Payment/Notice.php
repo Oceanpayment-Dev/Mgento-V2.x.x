@@ -5,7 +5,7 @@ namespace Oceanpayment\TouchnGo\Controller\Payment;
 
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Quote\Api\CartManagementInterface;
-use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\App\Filesystem\DirectoryList; 
 
 class Notice extends \Magento\Framework\App\Action\Action
 {

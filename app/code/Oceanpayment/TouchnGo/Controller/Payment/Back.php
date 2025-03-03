@@ -117,7 +117,6 @@ class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActi
 
                 $order->save();
 
-<<<<<<< HEAD
                 //保存sales->transactions支付记录
                 $payment->setLastTransId($_REQUEST['payment_id'])->setTransactionId($_REQUEST['payment_id'])->setIsTransactionClosed(true)
                 ->setShouldCloseParentTransaction(true);
@@ -125,9 +124,9 @@ class Back extends \Magento\Framework\App\Action\Action implements CsrfAwareActi
                 $transaction->setIsClosed(true);
                 $transaction->save();
 
-=======
+
 		$this->checkoutSession->getQuote();
->>>>>>> be274581dfd3aa6687bdbc9703e49c67d682d6eb
+
                 $url = 'checkout/onepage/success';
                 break;
             case 0:
