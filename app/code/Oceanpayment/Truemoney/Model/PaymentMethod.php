@@ -8,6 +8,7 @@ namespace Oceanpayment\Truemoney\Model;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Sales\Model\Order;
+use Magento\Framework\App\Filesystem\DirectoryList;
 
 class PaymentMethod extends AbstractMethod
 {
@@ -264,6 +265,9 @@ class PaymentMethod extends AbstractMethod
      * post log
      */
     public function postLog($logType, $data){
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $directoryList = $objectManager->get(DirectoryList::class);
+        $varPath = $directoryList->getPath(DirectoryList::VAR_DIR);
     
         $filedate   = date('Y-m-d');
         $newfile    = fopen(  dirname(dirname(__FILE__)) . "/oceanpayment_log/" . $filedate . ".log", "a+" );      
